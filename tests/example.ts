@@ -1,0 +1,27 @@
+import { parseTestContent, ParserResult } from '../src/index';
+
+const content = `
+        <T_body>
+<0>
+050000003c515f5449544c453e0d0a310d0a3c2f515f5449544c453e0d0a3c6f7074696f6e733e0d0a6e3d31300d0a747970
+653d320d0a72696768743d340d0a6d61783d320d0a3c2f6f7074696f6e733e0d0a3c76616c75653e0d0a310d0a310d0a310d
+0a310d0a310d0a310d0a310d0a310d0a310d0a310d0a3c2f76616c75653e0d0a3c7175657374696f6e3e0d0ad7f2ee20efee
+20eeeff0e5e4e5ebe5ede8fe20eceee6e5f220e2eaebfef7e0f2fc20e220f1e5e1ff20ddc2cc2028eaeeeceffcfef2e5f029
+3f0d0a3c2f7175657374696f6e3e0d0a3c6465736372697074696f6e3e0d0a3c2f6465736372697074696f6e3e0d0a3c615f
+313e0d0af0eee2edee20eee4e8ed20f6e5edf2f0e0ebfcedfbe920eff0eef6e5f1f1eef0200d0a3c2f615f313e0d0a3c615f
+323e0d0af3f1f2f0eee9f1f2e2e020e2e2eee4e02fe2fbe2eee4e00d0a3c2f615f323e0d0a3c615f333e0d0aeeefe5f0e0f2
+e8e2ede0ff20efe0ecfff2fc0d0a3c2f615f333e0d0a3c615f343e0d0aeff0eef6e5f1f1eef0fb20e2e2eee4e02fe2fbe2ee
+e4e00d0a3c2f615f343e0d0a3c615f353e0d0ae1e0e7fb20e4e0ededfbf50d0a3c2f615f353e0d0a3c615f363e0d0aeeefe5
+f0e0f6e8eeedede0ff20f1e8f1f2e5ece00d0a3c2f615f363e0d0a3c615f373e0d0aeff0e8eaebe0e4edfbe520eff0eee3f0
+e0ececfb0d0a3c2f615f373e0d0a3c615f383e0d0ae4e2e020e820e1eeebe5e520f6e5edf2f0e0ebfcedfbf520eff0eef6e5
+f1f1eef0eee20d0a3c2f615f383e0d0a3c615f393e0d0aeae0ede0eb20f1e2ffe7e80d0a3c2f615f393e0d0a3c615f31303e
+0d0af3e7e5eb2ff3e7ebfb20f1e2ffe7e80d0a3c2f615f31303e0d0a
+</0>
+        </T_body>
+      `;
+
+const result: ParserResult = parseTestContent(content, { debug: true });
+console.log('PARSER RESULT:');
+console.log(JSON.stringify(result, null, 2));
+// console.log('RAW log:');
+// console.log(result);
