@@ -3,9 +3,11 @@
  */
 
 import path from 'path';
+import iconv from 'iconv-lite';
 import fs from 'fs/promises';
 import { detectEncoding } from '../encoders/encoding-detector';
 import { decodeText } from '../encoders/text-decoder';
+import { calculatePoints } from '..';
 import {
     ParserOptions,
     ParserResult,
@@ -110,8 +112,8 @@ function parseQuestions(
     debug: boolean,
 ): Question[] {
     const questions: Question[] = [];
-    const questionRegex = /<(\d+)>([\s\S]*?)<\/\1>/g;
-    let match;
+    const questionRegex = /<(\d+)>\s*([\s\S]*?)\s*<\/\1>/g;
+    let match: RegExpExecArray | null;
 
     while ((match = questionRegex.exec(bodyContent)) !== null) {
         const questionId = match[1];
@@ -122,6 +124,7 @@ function parseQuestions(
                 questionId,
                 questionContent,
                 warnings,
+                debug,
             );
             if (question) {
                 questions.push(question);
@@ -145,45 +148,71 @@ function parseQuestionContent(
     id: string,
     content: string,
     warnings: string[],
-): Question | null {
+    debug: boolean = false,
+): Question | undefined {
     // Check if content is hex-encoded
     const isHexEncoded = /^[0-9A-Fa-f\s]+$/.test(content.trim());
 
-    // Decode hex content if needed
+    if (debug) {
+        console.log(
+            `Question ${id}: Content is ${isHexEncoded ? 'hex-encoded' : 'plain text'}`,
+        );
+    }
+
+    // decode hex content if needed
     let decodedContent = content;
     if (isHexEncoded) {
         try {
-            decodedContent = decodeHexContent(content);
+            decodedContent = decodeHexContent(content, debug);
+            if (debug) {
+                console.log('Decoded hex content:');
+                console.log(decodedContent.substring(0, 1600));
+            }
         } catch (error) {
             warnings.push(
                 `Failed to decode question ${id}: ${(error as Error).message}`,
             );
-            return null;
+            return undefined;
         }
     }
 
-    // Extract options from decoded content
-    const optionsMatch = content.match(/<options>([\s\S]*?)<\/options>/);
-    if (!optionsMatch) return null;
+    // get options from decoded content
+    const optionsMatch = decodedContent.match(/<options>([\s\S]*?)<\/options>/);
+    if (!optionsMatch) {
+        if (debug) {
+            console.log(`No options tag found in question ${id}`);
+        }
+        return undefined;
+    }
 
     const optionsContent = optionsMatch[1];
 
-    // Parse options
+    // parse options
     const nMatch = optionsContent.match(/n=(\d+)/);
     const typeMatch = optionsContent.match(/type=(\d+)/);
     const rightMatch = optionsContent.match(/right=(\d+)/);
     const maxMatch = optionsContent.match(/max=(\d+)/);
 
-    if (!nMatch || !typeMatch || !rightMatch) return null;
+    if (!nMatch || !typeMatch || !rightMatch) {
+        if (debug) {
+            console.log(`Missing required options in question ${id}`);
+        }
+        return undefined;
+    }
 
     const n = parseInt(nMatch[1]);
     const type = parseInt(typeMatch[1]) as QuestionType;
     const right = parseInt(rightMatch[1]);
     const max = maxMatch ? parseInt(maxMatch[1]) : 1;
 
-    // Extract values (correct answers)
-    const valueMatch = content.match(/<value>([\s\S]*?)<\/value>/);
-    if (!valueMatch) return null;
+    // get values (correct answers)
+    const valueMatch = decodedContent.match(/<value>([\s\S]*?)<\/value>/);
+    if (!valueMatch) {
+        if (debug) {
+            console.log(`No value tag found in question ${id}`);
+        }
+        return undefined;
+    }
 
     const valueContent = valueMatch[1];
     const correctAnswers = valueContent
@@ -193,38 +222,50 @@ function parseQuestionContent(
         .map((val, idx) => (val === 1 ? idx : -1))
         .filter((idx) => idx !== -1);
 
-    // Extract question text
-    const questionTextMatch = content.match(/<question>([\s\S]*?)<\/question>/);
-    if (!questionTextMatch) return null;
+    // get question text
+    const questionTextMatch = decodedContent.match(
+        /<question>([\s\S]*?)<\/question>/,
+    );
+    if (!questionTextMatch) {
+        if (debug) {
+            console.log(`No question tag found in question ${id}`);
+        }
+        return undefined;
+    }
 
     const questionText = decodeText(questionTextMatch[1].trim());
 
-    // Extract title if available
+    // get title if available
     let title = '';
-    const titleMatch = content.match(/<Q_TITLE>([\s\S]*?)<\/Q_TITLE>/);
+    const titleMatch = decodedContent.match(/<Q_TITLE>([\s\S]*?)<\/Q_TITLE>/);
     if (titleMatch) {
         title = titleMatch[1].trim();
     }
 
-    // Extract description
-    const descriptionMatch = content.match(
+    // get description
+    const descriptionMatch = decodedContent.match(
         /<description>([\s\S]*?)<\/description>/,
     );
     const description = descriptionMatch
         ? decodeText(descriptionMatch[1].trim())
         : '';
 
-    // Extract answers
+    // get answers
     const answers: { id: number; text: string }[] = [];
     for (let i = 1; i <= n; i++) {
-        const answerMatch = content.match(
-            new RegExp(`<a_${i}>([\s\S]*?)<\/a_${i}>`),
+        const answerRegex = new RegExp(
+            `<a_${i}>\\s*([\\s\\S]*?)\\s*<\\/a_${i}>`,
+            'i',
         );
-        if (answerMatch) {
+        const answerMatch = decodedContent.match(answerRegex);
+
+        if (answerMatch && answerMatch[1]) {
             answers.push({
                 id: i - 1,
-                text: decodeText(answerMatch[1].trim()),
+                text: answerMatch[1].trim(),
             });
+        } else if (debug) {
+            console.log(`Could not find answer ${i} in question ${id}`);
         }
     }
 
@@ -238,6 +279,8 @@ function parseQuestionContent(
         correctAnswers,
         rightCount: right,
         maxAttempts: max,
+        points: calculatePoints(type, right), // Calculate points based on question type
+        partialCredit: type === QuestionType.MultipleChoice && right > 1,
     };
 }
 
@@ -293,15 +336,58 @@ function parseCategories(
 /**
  * Decode hexadecimal encoded content
  */
-function decodeHexContent(hexContent: string): string {
+function decodeHexContent(hexContent: string, debug = false): string {
     try {
-        // Clean up whitespace and newlines
+        // clean up whitespace and newlines
         const cleanHex = hexContent.replace(/\s+/g, '');
-        // Convert hex to binary buffer
         const buffer = Buffer.from(cleanHex, 'hex');
-        // Convert buffer to string using appropriate encoding
-        // note: the encoding for binary probably isn't affected by anything, so it's likely a utf-8
-        return buffer.toString('utf8');
+
+        const possibleEncodings = [
+            'win1251',
+            'utf8',
+            'utf16le',
+            'udf16be',
+            'cp866',
+        ];
+
+        let decodedContent = '';
+        let usedEncoding = '';
+
+        // auto-detect
+        const detectedEncoding = detectEncoding(buffer);
+        if (debug) {
+            console.log(`Detected encoding: ${detectedEncoding}`);
+        }
+
+        // Try each encoding until one works
+        for (const encoding of [detectedEncoding, ...possibleEncodings]) {
+            try {
+                const decoded = iconv.decode(buffer, encoding);
+
+                // Quick validation
+                if (decoded.includes('<') && decoded.includes('>')) {
+                    decodedContent = decoded;
+                    usedEncoding = encoding;
+                    break;
+                }
+            } catch (e) {
+                // Continue to next encoding
+            }
+        }
+
+        if (!decodedContent) {
+            // Fallback to win1251 if all else fails
+            decodedContent = iconv.decode(buffer, 'win1251');
+            usedEncoding = 'win1251 (fallback)';
+        }
+
+        if (debug) {
+            console.log(`Used encoding: ${usedEncoding}`);
+            console.log(`Decoded content (first 200 chars):`);
+            console.log(decodedContent.substring(0, 200));
+        }
+
+        return decodedContent;
     } catch (error) {
         throw new Error(
             `Failed to decode hex content: ${(error as Error).message}`,
