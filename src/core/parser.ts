@@ -146,7 +146,23 @@ function parseQuestionContent(
     content: string,
     warnings: string[],
 ): Question | null {
-    // Extract options
+    // Check if content is hex-encoded
+    const isHexEncoded = /^[0-9A-Fa-f\s]+$/.test(content.trim());
+
+    // Decode hex content if needed
+    let decodedContent = content;
+    if (isHexEncoded) {
+        try {
+            decodedContent = decodeHexContent(content);
+        } catch (error) {
+            warnings.push(
+                `Failed to decode question ${id}: ${(error as Error).message}`,
+            );
+            return null;
+        }
+    }
+
+    // Extract options from decoded content
     const optionsMatch = content.match(/<options>([\s\S]*?)<\/options>/);
     if (!optionsMatch) return null;
 
@@ -272,4 +288,23 @@ function parseCategories(
     }
 
     return categories;
+}
+
+/**
+ * Decode hexadecimal encoded content
+ */
+function decodeHexContent(hexContent: string): string {
+    try {
+        // Clean up whitespace and newlines
+        const cleanHex = hexContent.replace(/\s+/g, '');
+        // Convert hex to binary buffer
+        const buffer = Buffer.from(cleanHex, 'hex');
+        // Convert buffer to string using appropriate encoding
+        // note: the encoding for binary probably isn't affected by anything, so it's likely a utf-8
+        return buffer.toString('utf8');
+    } catch (error) {
+        throw new Error(
+            `Failed to decode hex content: ${(error as Error).message}`,
+        );
+    }
 }
