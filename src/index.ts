@@ -6,3 +6,4 @@ export * from './core/parser';
 export * from './core/types';
 export * from './formatters/json-formatter';
 export * from './utils';
+export * from './encoders';
