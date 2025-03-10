@@ -9,3 +9,4 @@ export * from './encoders/text-decoder';
 export * from './encoders/encoding-detector';
 export * from './utils/tag-extractor';
 export * from './utils/block-processor';
+export * from './utils/txt-sanitizer';
