@@ -1,51 +1,30 @@
-/**
- * Text decoding utilities for converting between encodings
- */
-
-import iconv from 'iconv-lite';
+import * as iconv from 'iconv-lite';
 
 /**
- * Decode text from a buffer with the specified encoding
- *
- * @param buffer The buffer to decode
- * @param encoding The encoding to use
+ * Decodes text from one encoding to another
+ * @param text The text to decode
+ * @param sourceEncoding The source encoding (default: 'latin1')
+ * @param targetEncoding The target encoding (default: 'win1251')
  * @returns The decoded text
  */
 export function decodeText(
-    buffer: Buffer | string,
-    encoding: string = 'utf8',
+	text: string,
+	sourceEncoding: string = 'latin1',
+	targetEncoding: string = 'win1251',
 ): string {
-    if (typeof buffer === 'string') {
-        return decodeSimpleText(buffer);
-    }
-
-    try {
-        // Map common encoding names to iconv encoding names
-        const iconvEncoding = encoding === 'win1251' ? 'win1251' : encoding;
-
-        // Decode using iconv-lite
-        return iconv
-            .decode(buffer, iconvEncoding)
-            .replace(/\r\n/g, '\n')
-            .replace(/\r/g, '\n');
-    } catch (error) {
-        // Fallback to UTF-8 if decoding fails
-        return buffer.toString('utf8').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    }
+	try {
+		const buffer = iconv.encode(text, sourceEncoding);
+		return iconv.decode(buffer, targetEncoding);
+	} catch (error) {
+		console.error('Error decoding text:', error);
+		return text;
+	}
 }
 
 /**
- * Simple text decoder for handling common escape sequences
- * and other text normalization
- *
- * @param text The text to decode
- * @returns The decoded text
+ * Properly normalizes line endings to remove ^M characters
  */
-export function decodeSimpleText(text: string): string {
-    return text
-        .replace(/\\r\\n/g, '\n')
-        .replace(/\\t/g, '\t')
-        .replace(/\\"/g, '"')
-        .replace(/\\'/g, "'")
-        .replace(/\\\\/g, '\\');
+export function normalizeLineEndings(text: string): string {
+	// First convert all CR+LF to LF, then convert any remaining CR to LF
+	return text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }

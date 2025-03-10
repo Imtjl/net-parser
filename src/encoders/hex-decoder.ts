@@ -7,10 +7,23 @@ import * as iconv from 'iconv-lite';
  * @returns The decoded text
  */
 export function decodeHexString(
-    hexString: string,
-    encoding: string = 'win1251',
+	hexString: string,
+	encoding: string = 'win1251',
 ): string {
-    const cleanHex = hexString.replace(/\s+/g, '');
-    const buffer = Buffer.from(cleanHex, 'hex');
-    return iconv.decode(buffer, encoding);
+	try {
+		const cleanHex = hexString.replace(/\s+/g, '');
+		const buffer = Buffer.from(cleanHex, 'hex');
+		return iconv.decode(buffer, encoding);
+	} catch (error) {
+		console.log('Error decoding hex:', error);
+		return '[Hex Decoding Error]';
+	}
+}
+
+/**
+ * Checks if a string appears to be hex-encoded
+ */
+export function isHexEncoded(str: string): boolean {
+	const cleaned = str.replace(/\s+/g, '');
+	return /^[0-9A-Fa-f]+$/.test(cleaned) && cleaned.length >= 8;
 }

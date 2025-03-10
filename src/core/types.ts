@@ -107,8 +107,10 @@ export interface Answer {
 
 export interface ParserOptions {
 	debug?: boolean; // Enable debug output
-	encoding?: string; // Character encoding to use (default: win1251)
+	encoding?: string; // Character encoding for hex (default: win1251)
 	includeDeleted?: boolean; // Whether to include deleted questions
+	textSourceEncoding?: string; // Source encoding for text (default: latin1)
+	textTargetEncoding?: string; // Target encoding for text (default: win1251)
 }
 
 /**
@@ -139,4 +141,15 @@ export interface RawQuestionData {
 export interface TagContent {
 	tag: string; // Tag name
 	content: string; // Raw content between tags
+}
+
+/**
+ * Options for decoding content
+ */
+export interface DecodingOptions {
+	decodeHexContent?: boolean; // Whether to decode hex content
+	decodeTextContent?: boolean; // Whether to decode text content
+	hexEncoding?: string; // Encoding for hex content (default: win1251)
+	textSourceEncoding?: string; // Source encoding for text (default: latin1)
+	textTargetEncoding?: string; // Target encoding for text (default: win1251)
 }
