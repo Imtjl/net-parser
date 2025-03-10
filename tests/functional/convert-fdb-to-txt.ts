@@ -1,0 +1,47 @@
+const content = `
+<T_head>
+maxCount=1
+password=
+</T_head>
+<T_id>
+0
+</T_id>
+<T_title>
+Тест по телекоммуникационным системам
+</T_title>
+<tv_i>
+ТКС
+	1.1. Основные понятия
+		0
+</tv_i>
+<tv_p>
+2
+3
+4
+</tv_p>
+<T_body>
+<0>
+3c515f5449544c453e0d0a31303120caeeecefeeedede5edf2fb20ddc2cc0d0a3c2f515f5449544c453e0d0a3c6f7074696f6e733e0d0a6e3d31300d0a747970653d320d0a72696768743d340d0a6d61783d320d0a3c2f6f7074696f6e733e0d0a3c76616c75653e0d0a310d0a310d0a310d0a310d0a300d0a300d0a300d0a300d0a300d0a300d0a3c2f76616c75653e0d0a3c7175657374696f6e3e0d0ad7f2ee20efee20eeeff0e5e4e5ebe5ede8fe20eceee6e5f220e2eaebfef7e0f2fc20e220f1e5e1ff20ddc2cc2028eaeeeceffcfef2e5f0293f0d0a3c2f7175657374696f6e3e0d0a3c6465736372697074696f6e3e0d0ad2e5f1f2eee2e0ff20e7e0e4e0f7e020efee20eaeeecefeeedee5edf2e0ec20ddc2cc0d0a3c2f6465736372697074696f6e3e0d0a3c615f313e0d0ad6e5edf2f0e0ebfcedfbe920eff0eef6e5f1f1eef00d0a3c2f615f313e0d0a3c615f323e0d0ad3f1f2f0eee9f1f2e2e020e2e2eee4e02fe2fbe2eee4e00d0a3c2f615f323e0d0a3c615f333e0d0acef0eee3f0e0ececedee20eee1e5f1efe5f7e5ede8e50d0a3c2f615f333e0d0a3c615f343e0d0aceefe5f0e0f2e8e2ede0ff20efe0ecfff2fc0d0a3c2f615f343e0d0a3c615f353e0d0aeee1e5eaf2edfbe920eaeee40d0a3c2f615f353e0d0a3c615f363e0d0aceefe5f0e0f6e8eededfbe520f1e8f1f2e5ecfb0d0a3c2f615f363e0d0a3c615f373e0d0acef0e8eaebe0e4edfbe520eff0eee3f0e0ececfb0d0a3c2f615f373e0d0a3c615f383e0d0aeef1edeee2ede0ff20efe0ecfff2fc0d0a3c2f615f383e0d0a3c615f393e0d0aede0eaeef1e8f2e5ebe820e8edeeef0ece0f6e8e80d0a3c2f615f393e0d0a3c615f31303e0d0ae2edfef2f0e5edede8e520f3f1f2f0eee9f1f2e2e00d0a3c2f615f31303e0d0a
+</0>
+</T_body>
+<gr-id>
+3c47522d4c6973743e0d0ac3f0f3efefe020300d0a3c2f47522d4c6973743e0d0a3c47522d303e0d
+0a310d0a310d0a3c74765f693e0d0a300d0a3c2f74765f693e0d0a3c74765f703e0d0a320d0a330d
+0a340d0a3c2f74765f703e0d0a3c74765f643e0d0a3936350d0a3c2f74765f643e0d0a3c2f47522d
+303e
+</gr-id>
+<info-id>
+Название=ТЕЛЕКОММУНИКАЦИОННЫЕ СИСТЕМЫ
+Авторы=Алиев Т.И.  
+Копирайт=Раздел 1
+Дата=2021 год
+</info-id>
+<intro-id>
+</intro-id>
+`;
+
+// const result: ParserResult = parseTestContent(content, { debug: true });
+// console.log('PARSER RESULT:');
+// console.log(JSON.stringify(result, null, 2));
+// console.log('RAW log:');
+// console.log(result);

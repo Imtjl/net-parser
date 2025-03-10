@@ -1,4 +1,4 @@
-import { decodeText } from '../encoders/text-decoder';
+import { decodeText } from '../../src';
 
 // The text to decode
 const text = `
