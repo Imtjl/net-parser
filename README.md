@@ -9,11 +9,12 @@ in quiz-like learning platforms or exported into simple human-readable format.
 
 ## Features (wip)
 
-- [ ] Parses .et1 file format
-- [ ] Parses .fdb file format
+- [ ] Decodes .et1 file format
+- [ ] Converts .fdb file format to .txt, .md, .pdf, .json
+- [ ] Does health checks for encodings in created .txt
 - [ ] Automatically detects and handles different text encodings
-- [ ] Extracts questions, answers, categories, and metadata
-- [ ] Outputs clean, structured JSON
+- [ ] Extracts questions, answers
+- [ ] Extracts categories, and metadata
 - [ ] Handles corrupted or partially readable files
 - [ ] Command-line interface for easy integration
 
