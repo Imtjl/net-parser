@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { Task, TestData, TaskType } from '../core/types';
 import { parseTxt } from '../core/parser';
+import { normalizeImageExtensions } from '../utils/image-normalizer';
 
 /**
  * Convert a task to Markdown format
@@ -18,11 +19,12 @@ function taskToMarkdown(task: Task, imageBasePath?: string): string {
         const normalizedImageName = task.question.imgUrl
             .replace('pics\\', '')
             .replace('pics/', '')
-            .replace(/\.JPG$/i, '.jpg');
+            .replace(/\.JPG$/i, '.jpg')
+            .replace(/ /g, '%20');
 
         const imagePath = path.join(imageBasePath, normalizedImageName);
         questionText = questionText.replace(
-            /<img src='[^']+'>/,
+            /<img src='[^']+'>\.?/,
             `\n\n![Question ${task.id} Image](${imagePath})\n\n`,
         );
     }
@@ -124,9 +126,15 @@ export function convertTxtToMarkdown(
         const content = fs.readFileSync(inputPath, 'utf8');
         const testData = parseTxt(content);
 
+        // correct image's path in markdown file
         const relativeImagePath = imageBasePath
             ? getRelativeImagePath(outputPath, imageBasePath)
             : undefined;
+
+        // .{JPG|jpg} -> .jpg
+        if (imageBasePath && fs.existsSync(imageBasePath)) {
+            normalizeImageExtensions(imageBasePath);
+        }
 
         const markdown = testDataToMarkdown(testData, relativeImagePath);
         fs.writeFileSync(outputPath, markdown);
