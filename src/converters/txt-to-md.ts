@@ -47,24 +47,31 @@ function taskToMarkdown(task: Task, imageBasePath?: string): string {
 
     markdown += `*Type: ${taskTypeNames[task.options.type]} (${task.options.right} correct answer${task.options.right !== 1 ? 's' : ''})*\n\n`;
 
+    // Determine if we should use letter prefixes
+    const useLetterPrefixes =
+        task.options.type === TaskType.MatchingValues && task.question.imgUrl;
+
     // Add answers with highlighting for correct answers
     task.answers.forEach((answer) => {
         // first 'right' number of answers are correct
         const isCorrect = answer.idx <= task.options.right;
 
-        let prefix = `${answer.idx}`;
+        let answerText = '';
 
-        // If it's a matching values task and there's an image, use letters
-        if (task.options.type === TaskType.MatchingValues && task.question.imgUrl) {
-            // Convert index to letter (1->a, 2->b, etc.)
-            prefix = String.fromCharCode(96 + answer.idx);
-        }
-
-        if (isCorrect) {
-            markdown += `**✓ ${prefix}. ${answer.text}**\n\n`;
+        if (useLetterPrefixes) {
+            // Convert index to letter (1->a, 2->b, etc.) for matching values with images
+            const letterPrefix = String.fromCharCode(96 + answer.idx);
+            answerText = isCorrect
+                ? `**✓ ${letterPrefix}. ${answer.text}**\n\n`
+                : `   ${letterPrefix}. ${answer.text}\n\n`;
         } else {
-            markdown += `   ${prefix}. ${answer.text}\n\n`;
+            // No numbering for other question types
+            answerText = isCorrect
+                ? `**✓ ${answer.text}**\n\n`
+                : `   ${answer.text}\n\n`;
         }
+
+        markdown += answerText;
     });
 
     return markdown;
