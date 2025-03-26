@@ -10,7 +10,8 @@ in quiz-like learning platforms or exported into simple human-readable format.
 ## Features (wip)
 
 - [ ] Decodes .et1 file format
-- [ ] Converts .fdb file format to .txt, .md, .pdf, .json
+- [x] Converts .fdb file format to .txt, .md, .pdf
+- [ ] Converts to .json
 - [ ] Does health checks for encodings in created .txt
 - [ ] Automatically detects and handles different text encodings
 - [ ] Extracts questions, answers
@@ -20,7 +21,7 @@ in quiz-like learning platforms or exported into simple human-readable format.
 
 ## Installation
 
-Using bun:
+(COMING SOON) Using bun:
 
 ```bash
 # Install globally
@@ -31,6 +32,22 @@ bun install net-parser
 ```
 
 ## Usage
+
+CURRENT USAGE:
+
+```
+# 1. Convert FDB to TXT
+node dist/converters/fdb-to-txt.js exam.fdb exam.txt
+
+# Convert TXT directly to PDF
+node dist/converters/txt-to-pdf.js input.txt output.pdf [imageBasePath] [cssPath] [--keep-markdown]
+
+# Use --keep-markdown to preserve the intermediate Markdown file
+```
+
+
+> [!WARNING]
+> COMING SOON
 
 ```bash
 # Basic usage
@@ -46,33 +63,3 @@ net-parser validate path/to/file.fdb
 net-parser convert path/to/file.fdb --debug
 ```
 
-## Programmatic Usage
-
-```typescript
-import { parseTestFile } from 'net-parser';
-
-// Parse a file
-const result = await parseTestFile('path/to/file.fdb');
-console.log(result);
-
-// Parse content directly
-const content = await fs.readFile('path/to/file.fdb', 'utf-8');
-const result = parseTestContent(content);
-console.log(result);
-```
-
-## Architecture
-
-```
-net-parser/
-├── src/
-│   ├── core/           # Core parsing logic
-│   ├── encoders/       # Encoding detection/conversion
-│   ├── formatters/     # Output formatters
-│   └── cli.ts          # Command-line interface
-├── tests/              # Jest tests
-├── package.json
-├── tsconfig.json
-├── jest.config.js
-└── README.md
-```
